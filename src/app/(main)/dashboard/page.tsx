@@ -36,6 +36,19 @@ export default async function DashboardPage() {
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user!.id)
 
+  // Contar amigos aceptados (en cualquier dirección)
+  const { count: friendsCount } = await supabase
+    .from('friendships')
+    .select('id', { count: 'exact', head: true })
+    .or(`user_id.eq.${user!.id},friend_id.eq.${user!.id}`)
+    .eq('status', 'aceptado')
+
+  // Contar retos en los que participo
+  const { count: challengesCount } = await supabase
+    .from('challenge_participants')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user!.id)
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900">
@@ -54,11 +67,11 @@ export default async function DashboardPage() {
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400">Amigos</p>
-          <p className="text-2xl font-bold text-gray-900">0</p>
+          <p className="text-2xl font-bold text-gray-900">{friendsCount || 0}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <p className="text-xs text-gray-400">Retos activos</p>
-          <p className="text-2xl font-bold text-gray-900">0</p>
+          <p className="text-2xl font-bold text-gray-900">{challengesCount || 0}</p>
         </div>
       </div>
     </div>
