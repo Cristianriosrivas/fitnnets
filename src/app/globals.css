@@ -1,26 +1,84 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: #0a0f0d;
+  --color-surface: #141b19;
+  --color-surface-2: #1c2523;
+  --color-border: #2a3532;
+  --color-primary: #22c55e;
+  --color-primary-hover: #16a34a;
+  --color-primary-soft: #16a34a20;
+  --color-text-primary: #f5f7f6;
+  --color-text-secondary: #9ca8a5;
+  --color-text-muted: #6b7876;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Scrollbar oscuro para que combine */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+  border-radius: 8px;
+}
+
+/* Clases de utilidad reutilizables para el nuevo diseño */
+.card-dark {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+.card-dark-hover {
+  transition: border-color 0.2s ease;
+}
+.card-dark-hover:hover {
+  border-color: var(--color-primary);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #052e14;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  transition: border-color 0.2s ease;
+}
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+}
+
+.input-dark {
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+.input-dark::placeholder {
+  color: var(--color-text-muted);
+}
+.input-dark:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
 }

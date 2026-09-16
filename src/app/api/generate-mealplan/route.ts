@@ -68,6 +68,7 @@ DATOS:
 - Calorías diarias objetivo: ${dailyCalories} kcal
 - Peso: ${profile.weight_kg} kg
 - Tipo de cuerpo: ${profile.body_type}
+${profile.custom_goal_notes ? `- Meta personal en sus propias palabras: "${profile.custom_goal_notes}" (ajusta el plan alimenticio priorizando esto)` : ''}
 
 ${ingredientsInstruction}
 

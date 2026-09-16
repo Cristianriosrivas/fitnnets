@@ -51,6 +51,8 @@ DATOS DEL USUARIO:
 - Nivel de actividad: ${profile.activity_level}
 - Tipo de cuerpo (somatotipo): ${profile.body_type}
 - Lugar de entrenamiento: ${profile.training_place}
+${profile.custom_goal_notes ? `- Meta personal en sus propias palabras: "${profile.custom_goal_notes}" (dale prioridad a esto al diseñar la rutina)` : ''}
+
 
 LISTA DE EJERCICIOS DISPONIBLES (usa el campo "id"):
 ${JSON.stringify(exercises)}
