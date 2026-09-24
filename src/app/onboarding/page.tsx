@@ -46,20 +46,19 @@ export default function OnboardingPage() {
       return
     }
 
-    // upsert: crea la fila si no existe, o la actualiza si ya existe
     const { error: updateError } = await supabase
-  .from('profiles')
-  .update({
-    age: parseInt(formData.age),
-    weight_kg: parseFloat(formData.weight_kg),
-    height_cm: parseFloat(formData.height_cm),
-    gender: formData.gender,
-    goal: formData.goal,
-    activity_level: formData.activity_level,
-    body_type: formData.body_type,
-    training_place: formData.training_place,
-  })
-  .eq('id', user.id)
+      .from('profiles')
+      .update({
+        age: parseInt(formData.age),
+        weight_kg: parseFloat(formData.weight_kg),
+        height_cm: parseFloat(formData.height_cm),
+        gender: formData.gender,
+        goal: formData.goal,
+        activity_level: formData.activity_level,
+        body_type: formData.body_type,
+        training_place: formData.training_place,
+      })
+      .eq('id', user.id)
 
     if (updateError) {
       setError(updateError.message)
@@ -99,53 +98,47 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0f0d] px-4 py-8">
+      <div className="w-full max-w-md card-dark p-8">
         <div className="flex gap-2 mb-6">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
             <div
               key={s}
               className={`h-1.5 flex-1 rounded-full transition ${
-                s <= step ? 'bg-green-600' : 'bg-gray-200'
+                s <= step ? 'bg-green-500' : 'bg-[#1f2926]'
               }`}
             />
           ))}
         </div>
 
-        <p className="text-xs text-gray-400 mb-1">Paso {step} de {TOTAL_STEPS}</p>
+        <p className="text-xs text-[#6b7876] mb-1">Paso {step} de {TOTAL_STEPS}</p>
 
         {step === 1 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Cuéntanos sobre ti
-            </h2>
+            <h2 className="text-xl font-bold text-white mb-4">Cuéntanos sobre ti</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Edad
-                </label>
+                <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Edad</label>
                 <input
                   type="number"
                   value={formData.age}
                   onChange={(e) => updateField('age', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="input-dark w-full px-4 py-2.5 rounded-xl text-sm"
                   placeholder="ej: 25"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Género
-                </label>
+                <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Género</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['masculino', 'femenino', 'otro'].map((g) => (
                     <button
                       key={g}
                       type="button"
                       onClick={() => updateField('gender', g)}
-                      className={`py-2 rounded-lg border text-sm capitalize transition ${
+                      className={`py-2 rounded-xl border text-sm capitalize transition ${
                         formData.gender === g
-                          ? 'bg-green-600 text-white border-green-600'
-                          : 'border-gray-300 text-gray-600'
+                          ? 'bg-green-500 text-[#052e14] border-green-500'
+                          : 'border-[#2a3532] text-[#9ca8a5] hover:border-[#3a4744]'
                       }`}
                     >
                       {g}
@@ -159,32 +152,26 @@ export default function OnboardingPage() {
 
         {step === 2 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Tus medidas actuales
-            </h2>
+            <h2 className="text-xl font-bold text-white mb-4">Tus medidas actuales</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Peso (kg)
-                </label>
+                <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Peso (kg)</label>
                 <input
                   type="number"
                   step="0.1"
                   value={formData.weight_kg}
                   onChange={(e) => updateField('weight_kg', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="input-dark w-full px-4 py-2.5 rounded-xl text-sm"
                   placeholder="ej: 70"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Altura (cm)
-                </label>
+                <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Altura (cm)</label>
                 <input
                   type="number"
                   value={formData.height_cm}
                   onChange={(e) => updateField('height_cm', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="input-dark w-full px-4 py-2.5 rounded-xl text-sm"
                   placeholder="ej: 175"
                 />
               </div>
@@ -194,14 +181,10 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              ¿Cuál es tu objetivo?
-            </h2>
+            <h2 className="text-xl font-bold text-white mb-4">¿Cuál es tu objetivo?</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta principal
-                </label>
+                <label className="block text-sm font-medium text-[#9ca8a5] mb-2">Meta principal</label>
                 <div className="space-y-2">
                   {[
                     { value: 'perder_grasa', label: '🔥 Perder grasa' },
@@ -213,10 +196,10 @@ export default function OnboardingPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => updateField('goal', opt.value)}
-                      className={`w-full text-left px-4 py-2.5 rounded-lg border text-sm transition ${
+                      className={`w-full text-left px-4 py-2.5 rounded-xl border text-sm transition ${
                         formData.goal === opt.value
-                          ? 'bg-green-600 text-white border-green-600'
-                          : 'border-gray-300 text-gray-600'
+                          ? 'bg-green-500 text-[#052e14] border-green-500'
+                          : 'border-[#2a3532] text-[#9ca8a5] hover:border-[#3a4744]'
                       }`}
                     >
                       {opt.label}
@@ -226,9 +209,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nivel de actividad actual
-                </label>
+                <label className="block text-sm font-medium text-[#9ca8a5] mb-2">Nivel de actividad actual</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { value: 'sedentario', label: 'Sedentario' },
@@ -240,10 +221,10 @@ export default function OnboardingPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => updateField('activity_level', opt.value)}
-                      className={`py-2 rounded-lg border text-sm transition ${
+                      className={`py-2 rounded-xl border text-sm transition ${
                         formData.activity_level === opt.value
-                          ? 'bg-green-600 text-white border-green-600'
-                          : 'border-gray-300 text-gray-600'
+                          ? 'bg-green-500 text-[#052e14] border-green-500'
+                          : 'border-[#2a3532] text-[#9ca8a5] hover:border-[#3a4744]'
                       }`}
                     >
                       {opt.label}
@@ -257,70 +238,42 @@ export default function OnboardingPage() {
 
         {step === 4 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              ¿Cuál es tu tipo de cuerpo?
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Esto se llama <strong>somatotipo</strong>. Conocerlo ayuda a nuestra IA a
-              diseñar una rutina y un plan de alimentación más precisos para tu genética,
-              ya que cada tipo de cuerpo responde diferente al entrenamiento y a la dieta.
-              Elige el que más se parezca a ti (no tiene que ser exacto).
+            <h2 className="text-xl font-bold text-white mb-2">¿Cuál es tu tipo de cuerpo?</h2>
+            <p className="text-sm text-[#9ca8a5] mb-4">
+              Esto se llama <strong className="text-white">somatotipo</strong>. Conocerlo ayuda a
+              nuestra IA a diseñar una rutina y un plan de alimentación más precisos para tu
+              genética. Elige el que más se parezca a ti.
             </p>
 
             <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => updateField('body_type', 'ectomorfo')}
-                className={`w-full text-left px-4 py-3 rounded-lg border transition ${
-                  formData.body_type === 'ectomorfo'
-                    ? 'bg-green-600 text-white border-green-600'
-                    : 'border-gray-300 text-gray-700'
-                }`}
-              >
-                <p className="font-semibold text-sm">🧍 Ectomorfo</p>
-                <p className={`text-xs mt-0.5 ${formData.body_type === 'ectomorfo' ? 'text-green-50' : 'text-gray-400'}`}>
-                  Delgado, extremidades largas, le cuesta subir de peso o ganar músculo.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => updateField('body_type', 'mesomorfo')}
-                className={`w-full text-left px-4 py-3 rounded-lg border transition ${
-                  formData.body_type === 'mesomorfo'
-                    ? 'bg-green-600 text-white border-green-600'
-                    : 'border-gray-300 text-gray-700'
-                }`}
-              >
-                <p className="font-semibold text-sm">💪 Mesomorfo</p>
-                <p className={`text-xs mt-0.5 ${formData.body_type === 'mesomorfo' ? 'text-green-50' : 'text-gray-400'}`}>
-                  Complexión atlética, gana músculo con relativa facilidad.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => updateField('body_type', 'endomorfo')}
-                className={`w-full text-left px-4 py-3 rounded-lg border transition ${
-                  formData.body_type === 'endomorfo'
-                    ? 'bg-green-600 text-white border-green-600'
-                    : 'border-gray-300 text-gray-700'
-                }`}
-              >
-                <p className="font-semibold text-sm">🔵 Endomorfo</p>
-                <p className={`text-xs mt-0.5 ${formData.body_type === 'endomorfo' ? 'text-green-50' : 'text-gray-400'}`}>
-                  Complexión más robusta, tiende a acumular grasa con más facilidad.
-                </p>
-              </button>
+              {[
+                { value: 'ectomorfo', emoji: '🧍', title: 'Ectomorfo', desc: 'Delgado, extremidades largas, le cuesta subir de peso o ganar músculo.' },
+                { value: 'mesomorfo', emoji: '💪', title: 'Mesomorfo', desc: 'Complexión atlética, gana músculo con relativa facilidad.' },
+                { value: 'endomorfo', emoji: '🔵', title: 'Endomorfo', desc: 'Complexión más robusta, tiende a acumular grasa con más facilidad.' },
+              ].map((bt) => (
+                <button
+                  key={bt.value}
+                  type="button"
+                  onClick={() => updateField('body_type', bt.value)}
+                  className={`w-full text-left px-4 py-3 rounded-xl border transition ${
+                    formData.body_type === bt.value
+                      ? 'bg-green-500 text-[#052e14] border-green-500'
+                      : 'border-[#2a3532] text-[#9ca8a5] hover:border-[#3a4744]'
+                  }`}
+                >
+                  <p className="font-semibold text-sm">{bt.emoji} {bt.title}</p>
+                  <p className={`text-xs mt-0.5 ${formData.body_type === bt.value ? 'text-[#052e14]/80' : 'text-[#6b7876]'}`}>
+                    {bt.desc}
+                  </p>
+                </button>
+              ))}
             </div>
           </div>
         )}
 
         {step === 5 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              ¿Dónde vas a entrenar?
-            </h2>
+            <h2 className="text-xl font-bold text-white mb-4">¿Dónde vas a entrenar?</h2>
             <div className="space-y-2">
               {[
                 { value: 'gym', label: '🏋️ Gimnasio (con máquinas y pesas)' },
@@ -331,10 +284,10 @@ export default function OnboardingPage() {
                   key={opt.value}
                   type="button"
                   onClick={() => updateField('training_place', opt.value)}
-                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition ${
+                  className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition ${
                     formData.training_place === opt.value
-                      ? 'bg-green-600 text-white border-green-600'
-                      : 'border-gray-300 text-gray-600'
+                      ? 'bg-green-500 text-[#052e14] border-green-500'
+                      : 'border-[#2a3532] text-[#9ca8a5] hover:border-[#3a4744]'
                   }`}
                 >
                   {opt.label}
@@ -346,101 +299,42 @@ export default function OnboardingPage() {
 
         {step === 6 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              Medidas detalladas
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Este paso es <strong>totalmente opcional</strong>. Si nos das estas medidas
-              en centímetros, podremos hacer un seguimiento mucho más preciso de tu
-              progreso corporal. Puedes dejar en blanco lo que no sepas o no quieras
-              compartir ahora y agregarlo después desde tu perfil.
+            <h2 className="text-xl font-bold text-white mb-1">Medidas detalladas</h2>
+            <p className="text-sm text-[#9ca8a5] mb-4">
+              Este paso es <strong className="text-white">totalmente opcional</strong>. Si nos das
+              estas medidas en centímetros, podremos hacer un seguimiento mucho más preciso de tu
+              progreso corporal. Puedes dejar en blanco lo que no sepas.
             </p>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Pecho (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.chest_cm}
-                  onChange={(e) => updateField('chest_cm', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="Opcional"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Cintura (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.waist_cm}
-                  onChange={(e) => updateField('waist_cm', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="Opcional"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Cadera (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.hip_cm}
-                  onChange={(e) => updateField('hip_cm', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="Opcional"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Glúteos (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.glute_cm}
-                  onChange={(e) => updateField('glute_cm', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="Opcional"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Bíceps (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.bicep_cm}
-                  onChange={(e) => updateField('bicep_cm', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="Opcional"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Muslo (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.thigh_cm}
-                  onChange={(e) => updateField('thigh_cm', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="Opcional"
-                />
-              </div>
+              {[
+                { key: 'chest_cm', label: 'Pecho (cm)' },
+                { key: 'waist_cm', label: 'Cintura (cm)' },
+                { key: 'hip_cm', label: 'Cadera (cm)' },
+                { key: 'glute_cm', label: 'Glúteos (cm)' },
+                { key: 'bicep_cm', label: 'Bíceps (cm)' },
+                { key: 'thigh_cm', label: 'Muslo (cm)' },
+              ].map((field) => (
+                <div key={field.key}>
+                  <label className="block text-xs font-medium text-[#9ca8a5] mb-1">{field.label}</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={(formData as any)[field.key]}
+                    onChange={(e) => updateField(field.key, e.target.value)}
+                    className="input-dark w-full px-3 py-2 rounded-lg text-sm"
+                    placeholder="Opcional"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {error && (
-          <p className="text-red-500 text-sm bg-red-50 p-2 rounded-lg mt-4">{error}</p>
+          <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg mt-4">
+            {error}
+          </p>
         )}
 
         <div className="flex gap-3 mt-6">
@@ -448,7 +342,7 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium"
+              className="btn-secondary px-4 py-2.5 rounded-xl text-sm font-medium"
             >
               Atrás
             </button>
@@ -459,7 +353,7 @@ export default function OnboardingPage() {
               type="button"
               disabled={!canGoNext()}
               onClick={() => setStep(step + 1)}
-              className="flex-1 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 transition disabled:opacity-40"
+              className="btn-primary flex-1 py-2.5 rounded-xl disabled:opacity-40"
             >
               Continuar
             </button>
@@ -468,7 +362,7 @@ export default function OnboardingPage() {
               type="button"
               disabled={loading}
               onClick={handleSubmit}
-              className="flex-1 bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 transition disabled:opacity-40"
+              className="btn-primary flex-1 py-2.5 rounded-xl disabled:opacity-40"
             >
               {loading ? 'Guardando...' : 'Finalizar 🎉'}
             </button>
@@ -480,7 +374,7 @@ export default function OnboardingPage() {
             type="button"
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full text-center text-xs text-gray-400 mt-3 hover:underline"
+            className="w-full text-center text-xs text-[#6b7876] mt-3 hover:underline"
           >
             Saltar medidas y finalizar
           </button>

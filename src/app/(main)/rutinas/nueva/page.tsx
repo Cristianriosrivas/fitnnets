@@ -31,9 +31,7 @@ export default function NuevaRutinaPage() {
 
   const [catalog, setCatalog] = useState<ExerciseCatalogItem[]>([])
   const [routineTitle, setRoutineTitle] = useState('')
-  const [days, setDays] = useState<DayBlock[]>([
-    { title: 'Día 1', exercises: [] },
-  ])
+  const [days, setDays] = useState<DayBlock[]>([{ title: 'Día 1', exercises: [] }])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -49,7 +47,7 @@ export default function NuevaRutinaPage() {
   }, [])
 
   const addDay = () => {
-    setDays((prev) => [...prev, { title: `Día ${prev.length + 1}`, exercises: [] }])
+    setDays((prev) => [...prev, { title: 'Día ' + (prev.length + 1), exercises: [] }])
   }
 
   const removeDay = (dayIndex: number) => {
@@ -57,9 +55,7 @@ export default function NuevaRutinaPage() {
   }
 
   const updateDayTitle = (dayIndex: number, title: string) => {
-    setDays((prev) =>
-      prev.map((d, i) => (i === dayIndex ? { ...d, title } : d))
-    )
+    setDays((prev) => prev.map((d, i) => (i === dayIndex ? { ...d, title } : d)))
   }
 
   const addExerciseToDay = (dayIndex: number) => {
@@ -83,9 +79,7 @@ export default function NuevaRutinaPage() {
   const removeExerciseFromDay = (dayIndex: number, exIndex: number) => {
     setDays((prev) =>
       prev.map((d, i) =>
-        i === dayIndex
-          ? { ...d, exercises: d.exercises.filter((_, j) => j !== exIndex) }
-          : d
+        i === dayIndex ? { ...d, exercises: d.exercises.filter((_, j) => j !== exIndex) } : d
       )
     )
   }
@@ -135,11 +129,7 @@ export default function NuevaRutinaPage() {
 
     const { data: routine, error: routineError } = await supabase
       .from('routines')
-      .insert({
-        user_id: user.id,
-        title: routineTitle,
-        generated_by_ai: false,
-      })
+      .insert({ user_id: user.id, title: routineTitle, generated_by_ai: false })
       .select()
       .single()
 
@@ -153,11 +143,7 @@ export default function NuevaRutinaPage() {
       const day = days[i]
       const { data: routineDay, error: dayError } = await supabase
         .from('routine_days')
-        .insert({
-          routine_id: routine.id,
-          day_number: i + 1,
-          title: day.title,
-        })
+        .insert({ routine_id: routine.id, day_number: i + 1, title: day.title })
         .select()
         .single()
 
@@ -176,9 +162,7 @@ export default function NuevaRutinaPage() {
         order_index: index,
       }))
 
-      const { error: exError } = await supabase
-        .from('routine_exercises')
-        .insert(exercisesToInsert)
+      const { error: exError } = await supabase.from('routine_exercises').insert(exercisesToInsert)
 
       if (exError) {
         setError(exError.message)
@@ -193,35 +177,33 @@ export default function NuevaRutinaPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Crear rutina personalizada</h1>
+      <h1 className="text-2xl font-bold text-white mb-6">Crear rutina personalizada</h1>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Nombre de la rutina
-        </label>
+        <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Nombre de la rutina</label>
         <input
           type="text"
           value={routineTitle}
           onChange={(e) => setRoutineTitle(e.target.value)}
           placeholder="ej: Mi rutina de fuerza"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+          className="input-dark w-full px-4 py-2.5 rounded-xl text-sm"
         />
       </div>
 
       <div className="space-y-6">
         {days.map((day, dayIndex) => (
-          <div key={dayIndex} className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div key={dayIndex} className="card-dark p-5">
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="text"
                 value={day.title}
                 onChange={(e) => updateDayTitle(dayIndex, e.target.value)}
-                className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-green-500 focus:outline-none"
+                className="input-dark flex-1 px-3 py-1.5 rounded-lg text-sm font-semibold"
               />
               {days.length > 1 && (
                 <button
                   onClick={() => removeDay(dayIndex)}
-                  className="text-gray-400 hover:text-red-500"
+                  className="text-[#6b7876] hover:text-red-400"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -232,12 +214,12 @@ export default function NuevaRutinaPage() {
               {day.exercises.map((ex, exIndex) => (
                 <div
                   key={exIndex}
-                  className="flex flex-wrap items-center gap-2 bg-gray-50 rounded-lg p-3"
+                  className="flex flex-wrap items-center gap-2 bg-[#141b19] rounded-lg p-3"
                 >
                   <select
                     value={ex.exercise_id}
                     onChange={(e) => updateExercise(dayIndex, exIndex, 'exercise_id', e.target.value)}
-                    className="flex-1 min-w-[140px] px-2 py-1.5 border border-gray-200 rounded-lg text-sm"
+                    className="input-dark flex-1 min-w-[140px] px-2 py-1.5 rounded-lg text-sm"
                   >
                     {catalog.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -250,7 +232,7 @@ export default function NuevaRutinaPage() {
                     type="number"
                     value={ex.sets}
                     onChange={(e) => updateExercise(dayIndex, exIndex, 'sets', parseInt(e.target.value) || 0)}
-                    className="w-16 px-2 py-1.5 border border-gray-200 rounded-lg text-sm"
+                    className="input-dark w-16 px-2 py-1.5 rounded-lg text-sm"
                     placeholder="Series"
                   />
 
@@ -258,7 +240,7 @@ export default function NuevaRutinaPage() {
                     type="text"
                     value={ex.reps}
                     onChange={(e) => updateExercise(dayIndex, exIndex, 'reps', e.target.value)}
-                    className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm"
+                    className="input-dark w-20 px-2 py-1.5 rounded-lg text-sm"
                     placeholder="Reps"
                   />
 
@@ -266,13 +248,13 @@ export default function NuevaRutinaPage() {
                     type="number"
                     value={ex.rest_seconds}
                     onChange={(e) => updateExercise(dayIndex, exIndex, 'rest_seconds', parseInt(e.target.value) || 0)}
-                    className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm"
+                    className="input-dark w-20 px-2 py-1.5 rounded-lg text-sm"
                     placeholder="Desc. (s)"
                   />
 
                   <button
                     onClick={() => removeExerciseFromDay(dayIndex, exIndex)}
-                    className="text-gray-400 hover:text-red-500 ml-auto"
+                    className="text-[#6b7876] hover:text-red-400 ml-auto"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -282,7 +264,7 @@ export default function NuevaRutinaPage() {
 
             <button
               onClick={() => addExerciseToDay(dayIndex)}
-              className="flex items-center gap-1.5 text-green-600 text-sm font-medium mt-3 hover:underline"
+              className="flex items-center gap-1.5 text-green-500 text-sm font-medium mt-3 hover:underline"
             >
               <Plus size={16} />
               Agregar ejercicio
@@ -293,20 +275,22 @@ export default function NuevaRutinaPage() {
 
       <button
         onClick={addDay}
-        className="flex items-center gap-1.5 text-gray-600 text-sm font-medium mt-4 hover:text-gray-900"
+        className="flex items-center gap-1.5 text-[#9ca8a5] text-sm font-medium mt-4 hover:text-white"
       >
         <Plus size={16} />
         Agregar otro día
       </button>
 
       {error && (
-        <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg mt-4">{error}</p>
+        <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 p-3 rounded-lg mt-4">
+          {error}
+        </p>
       )}
 
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full bg-green-600 text-white font-semibold py-3 rounded-xl mt-6 hover:bg-green-700 transition disabled:opacity-50"
+        className="btn-primary w-full py-3 rounded-xl mt-6 disabled:opacity-50"
       >
         {saving ? 'Guardando...' : 'Guardar rutina'}
       </button>
