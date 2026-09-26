@@ -1,4 +1,5 @@
 import { createClient } from '@/core/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getGeminiModel } from '@/core/ai/gemini'
 import { NextResponse } from 'next/server'
 
@@ -26,8 +27,27 @@ function calcularCalorias(profile: any) {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let supabase = await createClient()
+  let { data: { user } } = await supabase.auth.getUser()
+
+  // Si no hay sesión por cookies (caso móvil), autentica con el token Bearer
+  if (!user) {
+    const authHeader = request.headers.get('authorization')
+    const token = authHeader?.replace('Bearer ', '')
+
+    if (token) {
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+        }
+      ) as any
+
+      const { data } = await supabase.auth.getUser(token)
+      user = data.user
+    }
+  }
 
   if (!user) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
@@ -95,7 +115,6 @@ Las calorías de todas las comidas deben sumar aproximadamente ${dailyCalories} 
     const cleanJson = rawText.replace(/```json|```/g, '').trim()
     const aiPlan = JSON.parse(cleanJson)
 
-    // Borrar el plan de HOY si ya existía (para regenerar limpio)
     const { data: existing } = await supabase
       .from('meal_plans')
       .select('id')
