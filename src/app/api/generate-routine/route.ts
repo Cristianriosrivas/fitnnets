@@ -2,9 +2,21 @@ import { createClient } from '@/core/supabase/server'
 import { getGeminiModel } from '@/core/ai/gemini'
 import { NextResponse } from 'next/server'
 
-export async function POST() {
+export async function POST(request: Request) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+
+  // Intenta primero con la sesión de cookies (web)
+  let { data: { user } } = await supabase.auth.getUser()
+
+  // Si no hay sesión por cookies, intenta con un token Bearer (móvil)
+  if (!user) {
+    const authHeader = request.headers.get('authorization')
+    const token = authHeader?.replace('Bearer ', '')
+    if (token) {
+      const { data } = await supabase.auth.getUser(token)
+      user = data.user
+    }
+  }
 
   if (!user) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
@@ -52,7 +64,6 @@ DATOS DEL USUARIO:
 - Tipo de cuerpo (somatotipo): ${profile.body_type}
 - Lugar de entrenamiento: ${profile.training_place}
 ${profile.custom_goal_notes ? `- Meta personal en sus propias palabras: "${profile.custom_goal_notes}" (dale prioridad a esto al diseñar la rutina)` : ''}
-
 
 LISTA DE EJERCICIOS DISPONIBLES (usa el campo "id"):
 ${JSON.stringify(exercises)}
