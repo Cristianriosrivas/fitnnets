@@ -1,18 +1,28 @@
 import { createClient } from '@/core/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getGeminiModel } from '@/core/ai/gemini'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  // Intenta primero con la sesión de cookies (web)
+  let supabase = await createClient()
   let { data: { user } } = await supabase.auth.getUser()
 
-  // Si no hay sesión por cookies, intenta con un token Bearer (móvil)
+  // Si no hay sesión por cookies (caso móvil), autentica con el token Bearer
   if (!user) {
     const authHeader = request.headers.get('authorization')
     const token = authHeader?.replace('Bearer ', '')
+
     if (token) {
+      // Crea un cliente nuevo, autenticado con ESTE token específico,
+      // para que auth.uid() funcione correctamente en las políticas de RLS
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+        }
+      ) as any
+
       const { data } = await supabase.auth.getUser(token)
       user = data.user
     }
