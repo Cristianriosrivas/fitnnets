@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, Dumbbell, TrendingUp, Utensils, Users, LogOut } from 'lucide-react'
+import { Home, Dumbbell, TrendingUp, Utensils, Users, Settings, LogOut, User } from 'lucide-react'
 import { createClient } from '@/core/supabase/client'
 
 const links = [
@@ -11,6 +11,7 @@ const links = [
   { href: '/progreso', label: 'Progreso', icon: TrendingUp },
   { href: '/nutricion', label: 'Nutrición', icon: Utensils },
   { href: '/social', label: 'Social', icon: Users },
+  { href: '/perfil', label: 'Perfil', icon: User },
 ]
 
 export default function Sidebar() {
