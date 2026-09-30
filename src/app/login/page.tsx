@@ -39,14 +39,16 @@ export default function LoginPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: window.location.origin + '/auth/callback',
       },
     })
 
     if (oauthError) {
-      setError('No se pudo iniciar sesión con Google')
+      setError('No se pudo iniciar sesion con Google')
     }
   }
+
+  const forgotPasswordText = 'Olvidaste tu contrasena?'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0f0d] px-4">
@@ -59,16 +61,16 @@ export default function LoginPage() {
         </div>
 
         <h1 className="text-xl font-bold text-center mb-1 text-white">
-          Bienvenido de nuevo 👋
+          Bienvenido de nuevo
         </h1>
         <p className="text-sm text-[#9ca8a5] text-center mb-6">
-          Disciplina hoy, resultados mañana.
+          Disciplina hoy, resultados manana.
         </p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-[#9ca8a5] mb-1">
-              Correo electrónico
+              Correo electronico
             </label>
             <input
               type="email"
@@ -82,7 +84,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-medium text-[#9ca8a5] mb-1">
-              Contraseña
+              Contrasena
             </label>
             <input
               type="password"
@@ -90,14 +92,11 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-dark w-full px-4 py-2.5 rounded-xl text-sm"
-              placeholder="••••••••"
+              placeholder="********"
             />
             <div className="flex justify-end mt-2">
-              
-                href="/forgot-password"
-                className="text-xs text-green-500 hover:underline"
-              >
-                ¿Olvidaste tu contraseña?
+              <a href="/forgot-password" className="text-xs text-green-500 hover:underline">
+                {forgotPasswordText}
               </a>
             </div>
           </div>
@@ -113,7 +112,7 @@ export default function LoginPage() {
             disabled={loading}
             className="btn-primary w-full py-2.5 rounded-xl disabled:opacity-50"
           >
-            {loading ? 'Ingresando...' : 'Iniciar sesión'}
+            {loading ? 'Ingresando...' : 'Iniciar sesion'}
           </button>
         </form>
 
@@ -138,9 +137,9 @@ export default function LoginPage() {
         </button>
 
         <p className="text-center text-sm text-[#6b7876] mt-6">
-          ¿No tienes cuenta?{' '}
+          No tienes cuenta?{' '}
           <a href="/register" className="text-green-500 font-medium hover:underline">
-            Regístrate
+            Registrate
           </a>
         </p>
       </div>
