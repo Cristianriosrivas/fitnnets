@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/core/supabase/client'
-import { Sparkles, Loader2, PlusCircle, Clock, Repeat, Dumbbell, ChevronDown } from 'lucide-react'
+import { Sparkles, Loader2, PlusCircle, Clock, Repeat, Dumbbell, ChevronDown, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function RutinasPage() {
@@ -13,6 +13,7 @@ export default function RutinasPage() {
   const [loadingList, setLoadingList] = useState(true)
   const [filter, setFilter] = useState<string>('todas')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadRoutines = async () => {
     setLoadingList(true)
@@ -41,6 +42,23 @@ export default function RutinasPage() {
     }
     await loadRoutines()
     setGenerating(false)
+  }
+
+  const handleDelete = async (routineId: string) => {
+    if (!confirm('¿Seguro que quieres borrar esta rutina? Esta acción no se puede deshacer.')) return
+
+    setDeletingId(routineId)
+    const { error: deleteError } = await supabase.from('routines').delete().eq('id', routineId)
+
+    if (deleteError) {
+      setError('No se pudo borrar la rutina: ' + deleteError.message)
+      setDeletingId(null)
+      return
+    }
+
+    if (expandedId === routineId) setExpandedId(null)
+    await loadRoutines()
+    setDeletingId(null)
   }
 
   const dayFilters = useMemo(() => {
@@ -122,6 +140,7 @@ export default function RutinasPage() {
         <div className="space-y-4">
           {filteredRoutines.map((routine, index) => {
             const isExpanded = expandedId === routine.id
+            const isDeleting = deletingId === routine.id
             const totalExercises = routine.routine_days?.reduce(
               (sum: number, d: any) => sum + (d.routine_exercises?.length || 0),
               0
@@ -133,7 +152,9 @@ export default function RutinasPage() {
             return (
               <div
                 key={routine.id}
-                className={`card-dark p-4 sm:p-5 ${index === 0 ? 'border-green-500/50' : ''}`}
+                className={`card-dark p-4 sm:p-5 transition-opacity ${index === 0 ? 'border-green-500/50' : ''} ${
+                  isDeleting ? 'opacity-40 pointer-events-none' : ''
+                }`}
               >
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="w-full sm:w-20 h-32 sm:h-20 rounded-xl overflow-hidden bg-[#1c2523] flex-shrink-0">
@@ -154,14 +175,24 @@ export default function RutinasPage() {
                           {routine.generated_by_ai ? routine.goal?.replace('_', ' ') : 'Rutina personalizada'}
                         </p>
                       </div>
-                      <Link
-                        href={`/rutinas/${routine.id}/entrenar`}
-                        className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg whitespace-nowrap flex-shrink-0 ${
-                          index === 0 ? 'btn-primary' : 'btn-secondary'
-                        }`}
-                      >
-                        Iniciar rutina
-                      </Link>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Link
+                          href={`/rutinas/${routine.id}/entrenar`}
+                          className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg whitespace-nowrap ${
+                            index === 0 ? 'btn-primary' : 'btn-secondary'
+                          }`}
+                        >
+                          Iniciar rutina
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(routine.id)}
+                          disabled={isDeleting}
+                          title="Borrar rutina"
+                          className="text-[#6b7876] hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition disabled:opacity-50"
+                        >
+                          {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-[#9ca8a5]">
