@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/core/supabase/client'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, CheckCircle2 } from 'lucide-react'
 
 type ExerciseCatalogItem = {
   id: string
@@ -25,9 +26,26 @@ type DayBlock = {
   exercises: DayExercise[]
 }
 
+// useSearchParams exige un limite Suspense en Next.js, por eso el formulario va en un
+// componente interno y la pagina exportada lo envuelve.
 export default function NuevaRutinaPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#6b7876]">Cargando...</div>}>
+      <NuevaRutinaForm />
+    </Suspense>
+  )
+}
+
+function NuevaRutinaForm() {
   const router = useRouter()
   const supabase = createClient()
+
+  // Si vienen estos parametros, la rutina se crea PARA un amigo (desde Social)
+  const searchParams = useSearchParams()
+  const friendId = searchParams.get('friendId')
+  const friendName = searchParams.get('friendName') || ''
+  const forFriend = !!friendId
+  const [sent, setSent] = useState(false)
 
   const [catalog, setCatalog] = useState<ExerciseCatalogItem[]>([])
   const [routineTitle, setRoutineTitle] = useState('')
@@ -45,6 +63,14 @@ export default function NuevaRutinaPage() {
     }
     loadCatalog()
   }, [])
+
+  // Al cambiar de destinatario, el formulario empieza limpio
+  useEffect(() => {
+    setRoutineTitle('')
+    setDays([{ title: 'Día 1', exercises: [] }])
+    setError('')
+    setSent(false)
+  }, [friendId])
 
   const addDay = () => {
     setDays((prev) => [...prev, { title: 'Día ' + (prev.length + 1), exercises: [] }])
@@ -120,6 +146,32 @@ export default function NuevaRutinaPage() {
 
     setSaving(true)
 
+    // --- Rutina para un amigo: la crea la funcion assign_routine en Supabase ---
+    if (forFriend) {
+      const { error: rpcError } = await supabase.rpc('assign_routine', {
+        p_friend_id: friendId,
+        p_title: routineTitle,
+        p_days: days.map((d) => ({
+          title: d.title,
+          exercises: d.exercises.map((ex) => ({
+            exercise_id: ex.exercise_id,
+            sets: ex.sets,
+            reps: ex.reps,
+            rest_seconds: ex.rest_seconds,
+          })),
+        })),
+      })
+
+      setSaving(false)
+      if (rpcError) {
+        setError(rpcError.message)
+        return
+      }
+      setSent(true)
+      return
+    }
+
+    // --- Rutina propia ---
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setError('Sesión no encontrada')
@@ -175,9 +227,49 @@ export default function NuevaRutinaPage() {
     router.refresh()
   }
 
+  // Pantalla de confirmacion despues de enviar una rutina a un amigo
+  if (sent) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16">
+        <div className="card-dark p-8 text-center">
+          <CheckCircle2 size={40} className="text-green-500 mx-auto mb-3" />
+          <h1 className="text-xl font-bold text-white mb-2">Rutina enviada</h1>
+          <p className="text-sm text-[#9ca8a5] mb-6">
+            {friendName} la vera en su lista de rutinas, con tu nombre como creador.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <Link href="/social" className="btn-primary px-4 py-2.5 rounded-xl text-sm">
+              Volver a Social
+            </Link>
+            <button
+              onClick={() => {
+                setSent(false)
+                setRoutineTitle('')
+                setDays([{ title: 'Día 1', exercises: [] }])
+              }}
+              className="btn-secondary px-4 py-2.5 rounded-xl text-sm"
+            >
+              Crear otra rutina
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-white mb-6">Crear rutina personalizada</h1>
+      <h1 className="text-2xl font-bold text-white mb-6">
+        {forFriend ? 'Rutina para ' + friendName : 'Crear rutina personalizada'}
+      </h1>
+
+      {forFriend && (
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 mb-6">
+          <p className="text-blue-300 text-xs">
+            {'Esta rutina aparecera en la lista de ' + friendName + ' con tu nombre como creador.'}
+          </p>
+        </div>
+      )}
 
       <div className="mb-6">
         <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Nombre de la rutina</label>
@@ -292,7 +384,7 @@ export default function NuevaRutinaPage() {
         disabled={saving}
         className="btn-primary w-full py-3 rounded-xl mt-6 disabled:opacity-50"
       >
-        {saving ? 'Guardando...' : 'Guardar rutina'}
+        {saving ? 'Guardando...' : forFriend ? 'Enviar rutina a ' + friendName : 'Guardar rutina'}
       </button>
     </div>
   )
