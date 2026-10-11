@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/core/supabase/client'
-import { Search, UserPlus, Check, X, Users, Trophy, ArrowRight } from 'lucide-react'
+import { Search, UserPlus, Check, X, Users, Trophy, ArrowRight, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SocialPage() {
@@ -210,7 +210,14 @@ export default function SocialPage() {
                         <div className="w-9 h-9 rounded-full bg-green-500/15 text-green-500 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">
                           {initials(f.profile?.username)}
                         </div>
-                        <span className="text-sm text-white truncate">{f.profile?.username}</span>
+                        <span className="text-sm text-white truncate flex-1 min-w-0">{f.profile?.username}</span>
+                        <Link
+                          href={`/rutinas/nueva?friendId=${f.profile?.id}&friendName=${encodeURIComponent(f.profile?.username || '')}`}
+                          className="btn-secondary flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg flex-shrink-0"
+                        >
+                          <PlusCircle size={14} />
+                          Crear rutina
+                        </Link>
                       </div>
                     ))}
                   </div>
