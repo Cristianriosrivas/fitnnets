@@ -13,13 +13,12 @@ export default function RutinasPage() {
   const [loadingList, setLoadingList] = useState(true)
   const [filter, setFilter] = useState<string>('todas')
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadRoutines = async () => {
     setLoadingList(true)
     const { data } = await supabase
       .from('routines')
-      .select('id, title, goal, generated_by_ai, created_at, routine_days(id, day_number, title, routine_exercises(id, sets, reps, rest_seconds, exercises(name, muscle_group, gif_url)))')
+      .select('id, title, goal, generated_by_ai, created_at, created_by, creator:profiles!routines_created_by_fkey(username), routine_days(id, day_number, title, routine_exercises(id, sets, reps, rest_seconds, exercises(name, muscle_group, gif_url)))')
       .order('created_at', { ascending: false })
 
     setRoutines(data || [])
@@ -45,21 +44,24 @@ export default function RutinasPage() {
   }
 
   const handleDelete = async (routineId: string) => {
-    if (!confirm('¿Seguro que quieres borrar esta rutina? Esta acción no se puede deshacer.')) return
+    if (!confirm('Seguro que quieres borrar esta rutina? Esta accion no se puede deshacer.')) return
 
-    setDeletingId(routineId)
-    const { error: deleteError } = await supabase.from('routines').delete().eq('id', routineId)
+    // .select('id') devuelve las filas borradas: si viene vacio, la base de datos
+    // rechazo el borrado en silencio (falta la politica de RLS de borrado)
+    const { data, error: deleteError } = await supabase
+      .from('routines')
+      .delete()
+      .eq('id', routineId)
+      .select('id')
 
-    if (deleteError) {
-      setError('No se pudo borrar la rutina: ' + deleteError.message)
-      setDeletingId(null)
+    if (deleteError || !data || data.length === 0) {
+      setError(deleteError?.message || 'No se pudo borrar la rutina. Revisa la politica de borrado en Supabase.')
       return
     }
-
-    if (expandedId === routineId) setExpandedId(null)
     await loadRoutines()
-    setDeletingId(null)
   }
+
+  const hasFriendRoutines = routines.some((r) => r.created_by)
 
   const dayFilters = useMemo(() => {
     const counts = new Set(routines.filter((r) => r.generated_by_ai).map((r) => r.routine_days?.length || 0))
@@ -68,7 +70,8 @@ export default function RutinasPage() {
 
   const filteredRoutines = routines.filter((r) => {
     if (filter === 'todas') return true
-    if (filter === 'personalizada') return !r.generated_by_ai
+    if (filter === 'personalizada') return !r.generated_by_ai && !r.created_by
+    if (filter === 'amigos') return !!r.created_by
     return (r.routine_days?.length || 0) === parseInt(filter)
   })
 
@@ -124,6 +127,16 @@ export default function RutinasPage() {
         >
           Personalizada
         </button>
+        {hasFriendRoutines && (
+          <button
+            onClick={() => setFilter('amigos')}
+            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition ${
+              filter === 'amigos' ? 'bg-green-500 text-[#052e14]' : 'bg-[#141b19] text-[#9ca8a5] border border-[#2a3532]'
+            }`}
+          >
+            De amigos
+          </button>
+        )}
       </div>
 
       {error && (
@@ -140,7 +153,6 @@ export default function RutinasPage() {
         <div className="space-y-4">
           {filteredRoutines.map((routine, index) => {
             const isExpanded = expandedId === routine.id
-            const isDeleting = deletingId === routine.id
             const totalExercises = routine.routine_days?.reduce(
               (sum: number, d: any) => sum + (d.routine_exercises?.length || 0),
               0
@@ -152,9 +164,7 @@ export default function RutinasPage() {
             return (
               <div
                 key={routine.id}
-                className={`card-dark p-4 sm:p-5 transition-opacity ${index === 0 ? 'border-green-500/50' : ''} ${
-                  isDeleting ? 'opacity-40 pointer-events-none' : ''
-                }`}
+                className={`card-dark p-4 sm:p-5 ${index === 0 ? 'border-green-500/50' : ''}`}
               >
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="w-full sm:w-20 h-32 sm:h-20 rounded-xl overflow-hidden bg-[#1c2523] flex-shrink-0">
@@ -174,6 +184,11 @@ export default function RutinasPage() {
                         <p className="text-xs text-[#9ca8a5] capitalize">
                           {routine.generated_by_ai ? routine.goal?.replace('_', ' ') : 'Rutina personalizada'}
                         </p>
+                        {routine.created_by && (
+                          <span className="inline-block mt-1.5 text-[11px] font-medium text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-md px-2 py-0.5">
+                            Rutina creada por {routine.creator?.username || 'un amigo'}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <Link
@@ -186,11 +201,10 @@ export default function RutinasPage() {
                         </Link>
                         <button
                           onClick={() => handleDelete(routine.id)}
-                          disabled={isDeleting}
+                          className="text-[#6b7876] hover:text-red-400 p-2"
                           title="Borrar rutina"
-                          className="text-[#6b7876] hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition disabled:opacity-50"
                         >
-                          {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
