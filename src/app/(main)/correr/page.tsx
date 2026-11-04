@@ -396,7 +396,7 @@ export default function CorrerPage() {
     }
 
     return (
-      <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+      <div className="relative max-w-xl mx-auto px-4 py-8">
         <GlowOrb color={colors.primary} size={380} style={{ top: -140, left: 'calc(50% - 190px)' }} intensity={0.28} />
         <FadeIn className="relative text-center mb-4">
           <p className="text-green-500 text-xs font-bold uppercase" style={{ letterSpacing: 2 }}>{run.activity === 'correr' ? 'Carrera completada' : 'Caminata completada'}</p>
@@ -564,7 +564,7 @@ export default function CorrerPage() {
 
   // ----- Preparación -----
   return (
-    <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-xl mx-auto px-4 py-8">
       <GlowOrb color={colors.orange} size={360} style={{ top: -170, right: -140 }} intensity={0.24} />
       <FadeIn className="relative flex items-end gap-3 mb-6">
         <button type="button" onClick={() => router.back()} aria-label="Volver" className="mb-1.5 text-[#9ca8a5] hover:text-white">

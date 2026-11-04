@@ -56,7 +56,7 @@ export default async function MainLayout({
     <div className="flex min-h-screen bg-[#0a0f0d]">
       <Sidebar />
       <div className="flex-1 min-w-0">
-        <main className="pb-24 md:pb-0">{children}</main>
+        <main className="pb-24 md:pb-0 overflow-x-clip">{children}</main>
         <BottomNav />
       </div>
       <AppNotices />

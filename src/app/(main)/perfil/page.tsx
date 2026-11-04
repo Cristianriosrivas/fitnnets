@@ -129,7 +129,7 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-xl mx-auto px-4 py-8">
       <GlowOrb color={colors.primary} size={340} style={{ top: -170, right: -130 }} intensity={0.22} />
 
       {/* Avatar 3D */}

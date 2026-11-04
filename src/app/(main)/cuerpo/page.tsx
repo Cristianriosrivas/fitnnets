@@ -271,7 +271,7 @@ function Cuerpo() {
   if (friendId) {
     const comparison = theirs ? compareProfiles(mine, theirs) : null
     return (
-      <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+      <div className="relative max-w-xl mx-auto px-4 py-8">
         <GlowOrb color={colors.sky} size={360} style={{ top: -160, right: -140 }} intensity={0.22} />
         <FadeIn className="relative">{header}</FadeIn>
 
@@ -387,7 +387,7 @@ function Cuerpo() {
   const hasData = mine.ranked.some((r) => r.volume > 0)
 
   return (
-    <div className="relative max-w-5xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-5xl mx-auto px-4 py-8">
       <GlowOrb color={glowFor(mine)} size={420} style={{ top: 120, left: 'calc(50% - 210px)' }} intensity={0.18} />
       <FadeIn className="relative">{header}</FadeIn>
 

@@ -108,7 +108,7 @@ export default function LogrosPage() {
     .sort((a, b) => b.progress / b.goal - a.progress / a.goal)[0]
 
   return (
-    <div className="relative max-w-4xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-4xl mx-auto px-4 py-8">
       <GlowOrb color={colors.gold} size={360} style={{ top: -140, right: -120 }} intensity={0.25} />
 
       <div className="relative flex items-center gap-3 mb-5">

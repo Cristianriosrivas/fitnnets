@@ -155,7 +155,7 @@ function Progreso() {
   }
 
   return (
-    <div className="relative max-w-5xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-5xl mx-auto px-4 py-8">
       <GlowOrb color={colors.primary} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
       <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>

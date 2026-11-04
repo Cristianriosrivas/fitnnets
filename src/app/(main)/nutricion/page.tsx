@@ -185,7 +185,7 @@ export default function NutricionPage() {
   }
 
   return (
-    <div className="relative max-w-6xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-6xl mx-auto px-4 py-8">
       <GlowOrb color={colors.orange} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
       <div className="relative flex items-start justify-between mb-6">
         <div>

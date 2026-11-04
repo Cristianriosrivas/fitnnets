@@ -125,7 +125,7 @@ export default function PrivacidadCuentaPage() {
   const isCurrent = consent?.consent_version === POLICY_VERSION
 
   return (
-    <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-xl mx-auto px-4 py-8">
       <GlowOrb color={colors.violet} size={340} style={{ top: -170, right: -130 }} intensity={0.24} />
       <FadeIn className="relative flex items-end gap-3 mb-5">
         <Link href="/perfil" aria-label="Volver al perfil" className="mb-1.5 text-[#9ca8a5] hover:text-white">

@@ -215,7 +215,7 @@ function WorkoutSummary({
     .slice(0, 4)
 
   return (
-    <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-xl mx-auto px-4 py-8">
       <GlowOrb color={tier.colors[1]} size={420} style={{ top: -120, left: 'calc(50% - 210px)' }} intensity={0.3} />
 
       <FadeIn className="relative text-center mb-5">
@@ -377,7 +377,7 @@ function Entrenar() {
   const exerciseStart = useRef(0)
 
   const [profile, setProfile] = useState<TrainingProfile>({ weightKg: null, gender: null, goal: null, activityLevel: null })
-  const [history, setHistory] = useState<WeightHistory>({})
+  const [history, setHistory] = useState<WeightHistory | null>(null)
   const [weights, setWeights] = useState<Record<string, string>>({})
   const [results, setResults] = useState<ExerciseResult[]>([])
   const [report, setReport] = useState<WorkoutReport | null>(null)
@@ -445,12 +445,13 @@ function Entrenar() {
     setCurrentSet(1)
     setPhase('exercise')
     setResults([])
+    setHistory(null)
     sessionStart.current = Date.now()
     exerciseStart.current = Date.now()
     setNow(Date.now())
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) setHistory(await loadWeightHistory(user.id, flat.map((f) => f.info.exerciseId)))
+    setHistory(user ? await loadWeightHistory(user.id, flat.map((f) => f.info.exerciseId)).catch(() => ({})) : {})
   }
 
   useEffect(() => {
@@ -465,8 +466,9 @@ function Entrenar() {
   }, [phase, secondsLeft])
 
   const currentExercise = queue[currentIndex]
-  const currentHistory = currentExercise ? history[currentExercise.info.exerciseId] || [] : []
-  const recommendation = currentExercise ? recommendWeight(currentExercise.info, currentHistory, profile) : null
+  const currentHistory = (currentExercise && history?.[currentExercise.info.exerciseId]) || []
+  // Sin historial cargado todavía no se sugiere nada: la estimación inicial pisaría la sugerencia real
+  const recommendation = currentExercise && history ? recommendWeight(currentExercise.info, currentHistory, profile) : null
 
   // Al llegar a cada ejercicio, el campo de peso arranca con la sugerencia
   useEffect(() => {

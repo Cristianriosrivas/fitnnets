@@ -94,7 +94,7 @@ export default function SocialPage() {
   const initials = (name: string) => name?.[0]?.toUpperCase() || '?'
 
   return (
-    <div className="relative max-w-5xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-5xl mx-auto px-4 py-8">
       <GlowOrb color={colors.sky} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
       <div className="relative flex items-center justify-between mb-6">
         <div>

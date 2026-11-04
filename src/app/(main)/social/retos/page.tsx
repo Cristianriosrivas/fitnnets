@@ -94,7 +94,7 @@ export default function RetosPage() {
   }
 
   return (
-    <div className="relative max-w-4xl mx-auto px-4 py-8 overflow-hidden">
+    <div className="relative max-w-4xl mx-auto px-4 py-8">
       <GlowOrb color={colors.gold} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
       <div className="flex items-center gap-3 mb-6">
         <Link href="/social" className="text-[#9ca8a5] hover:text-white">
