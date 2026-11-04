@@ -8,8 +8,8 @@ export const POLICY_DATE = '15 de octubre de 2026'
 export const LEGAL_INFO = {
   appName: 'Finnets',
   responsable: 'Cristian Ríos',
-  email: 'TU_CORREO_DE_CONTACTO@ejemplo.com',
-  domicilio: 'TU_CIUDAD, Colombia',
+  email: 'cristiandavidriosrivas@gmail.com',
+  domicilio: 'Colombia',
   sitio: 'https://fitnnets.vercel.app',
 }
 

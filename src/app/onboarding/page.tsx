@@ -1,5 +1,6 @@
 'use client'
 
+import Aurora from '@/components/ui/Aurora'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/core/supabase/client'
@@ -98,8 +99,9 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0f0d] px-4 py-8">
-      <div className="w-full max-w-md card-dark p-8">
+    <div className="relative min-h-screen flex items-center justify-center bg-[#0a0f0d] px-4 py-8 overflow-hidden">
+      <Aurora height="100%" />
+      <div className="relative w-full max-w-md glass-card rounded-3xl p-8">
         <div className="flex gap-2 mb-6">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
             <div

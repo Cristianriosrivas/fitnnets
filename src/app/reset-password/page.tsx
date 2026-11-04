@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { LockKeyhole } from 'lucide-react'
 import { createClient } from '@/core/supabase/client'
-import { Dumbbell } from 'lucide-react'
+import AuthShell, { AuthField } from '@/components/ui/AuthShell'
+import GradientButton from '@/components/ui/GradientButton'
+import { colors } from '@/components/ui/theme'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -33,60 +36,33 @@ export default function ResetPasswordPage() {
     }, 2000)
   }
 
+  if (success) {
+    return (
+      <AuthShell title="¡Contraseña actualizada! ✅" subtitle="Te llevaremos al login en un momento...">
+        <span />
+      </AuthShell>
+    )
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0f0d] px-4">
-      <div className="w-full max-w-sm card-dark p-8">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="bg-green-500/15 text-green-500 p-2 rounded-xl">
-            <Dumbbell size={22} />
-          </div>
-          <span className="font-bold text-xl text-white">Finnets</span>
-        </div>
+    <AuthShell title="Nueva contraseña" subtitle="Escribe tu nueva contraseña.">
+      <form onSubmit={handleSubmit}>
+        <AuthField
+          label="Nueva contraseña"
+          icon={<LockKeyhole color={colors.muted} size={18} />}
+          secret
+          required
+          minLength={6}
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Mínimo 6 caracteres"
+        />
 
-        {success ? (
-          <div className="text-center">
-            <h1 className="text-lg font-bold text-white mb-2">¡Contraseña actualizada! ✅</h1>
-            <p className="text-sm text-[#9ca8a5]">Te llevaremos al login en un momento...</p>
-          </div>
-        ) : (
-          <>
-            <h1 className="text-xl font-bold text-center mb-6 text-white">
-              Escribe tu nueva contraseña
-            </h1>
+        {error ? <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg mb-4">{error}</p> : null}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[#9ca8a5] mb-1">
-                  Nueva contraseña
-                </label>
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-dark w-full px-4 py-2.5 rounded-xl text-sm"
-                  placeholder="Mínimo 6 caracteres"
-                />
-              </div>
-
-              {error && (
-                <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary w-full py-2.5 rounded-xl disabled:opacity-50"
-              >
-                {loading ? 'Guardando...' : 'Actualizar contraseña'}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
-    </div>
+        <GradientButton type="submit" title={loading ? 'Guardando...' : 'Actualizar contraseña'} loading={loading} className="w-full" />
+      </form>
+    </AuthShell>
   )
 }

@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/core/supabase/client'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trophy, Users } from 'lucide-react'
+import { GlowOrb } from '@/components/ui/Aurora'
+import { colors } from '@/components/ui/theme'
+
+const MEDALS = ['🥇', '🥈', '🥉']
 
 export default function RetosPage() {
   const supabase = createClient()
@@ -90,12 +94,13 @@ export default function RetosPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="relative max-w-4xl mx-auto px-4 py-8 overflow-hidden">
+      <GlowOrb color={colors.gold} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
       <div className="flex items-center gap-3 mb-6">
         <Link href="/social" className="text-[#9ca8a5] hover:text-white">
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-2xl font-bold text-white flex-1">Retos</h1>
+        <h1 className="text-3xl font-extrabold text-white flex-1">Retos</h1>
         <button
           onClick={() => setShowCreate((v) => !v)}
           className="btn-primary flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl"
@@ -185,8 +190,8 @@ export default function RetosPage() {
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className={`text-xs font-bold w-5 ${index === 0 ? 'text-yellow-400' : 'text-[#6b7876]'}`}>
-                          {index + 1}
+                        <span className={`text-center w-6 ${index < 3 ? 'text-base' : 'text-xs font-bold text-[#6b7876]'}`}>
+                          {MEDALS[index] ?? index + 1}
                         </span>
                         <span className="text-sm text-white">{p.profiles?.username}</span>
                       </div>

@@ -1,5 +1,7 @@
 'use client'
 
+import { GlowOrb } from '@/components/ui/Aurora'
+import { colors } from '@/components/ui/theme'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/core/supabase/client'
 import {
@@ -183,10 +185,12 @@ export default function NutricionPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-start justify-between mb-6">
+    <div className="relative max-w-6xl mx-auto px-4 py-8 overflow-hidden">
+      <GlowOrb color={colors.orange} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
+      <div className="relative flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">¡Hola, {username || 'atleta'}! 🔥</h1>
+          <p className="text-green-500 text-xs font-bold uppercase" style={{ letterSpacing: 2 }}>Nutrición</p>
+          <h1 className="text-3xl font-extrabold text-white mt-1">¡Hola, {username || 'atleta'}! 🔥</h1>
           <p className="text-sm text-[#9ca8a5] mt-0.5">Tu alimentación es el combustible para tus metas.</p>
         </div>
         <p className="text-xs text-[#6b7876] hidden sm:block capitalize">

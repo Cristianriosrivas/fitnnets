@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/core/supabase/client'
 import { Sparkles, Loader2, PlusCircle, Clock, Repeat, Dumbbell, ChevronDown, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { GlowOrb } from '@/components/ui/Aurora'
+import { colors } from '@/components/ui/theme'
 
 export default function RutinasPage() {
   const supabase = createClient()
@@ -76,9 +78,13 @@ export default function RutinasPage() {
   })
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-white">Tus Rutinas</h1>
+    <div className="relative max-w-4xl mx-auto px-4 py-8 overflow-hidden">
+      <GlowOrb color={colors.primary} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
+      <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <p className="text-green-500 text-xs font-bold uppercase" style={{ letterSpacing: 2 }}>Entrenamiento</p>
+          <h1 className="text-3xl font-extrabold text-white mt-1">Tus Rutinas</h1>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={handleGenerate}
@@ -99,7 +105,7 @@ export default function RutinasPage() {
       </div>
 
       {/* Filtros por pestañas */}
-      <div className="flex gap-2 overflow-x-auto pb-1 mb-6">
+      <div className="relative flex gap-2 overflow-x-auto pb-1 mb-6">
         <button
           onClick={() => setFilter('todas')}
           className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition ${
@@ -150,7 +156,7 @@ export default function RutinasPage() {
           <p className="text-[#9ca8a5]">No hay rutinas en esta categoría.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="relative space-y-4">
           {filteredRoutines.map((routine, index) => {
             const isExpanded = expandedId === routine.id
             const totalExercises = routine.routine_days?.reduce(

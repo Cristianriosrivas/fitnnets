@@ -1,12 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/core/supabase/client'
-import { Save, Check } from 'lucide-react'
+import { Save, Check, ChevronRight, PersonStanding, ShieldCheck, Trophy } from 'lucide-react'
+import IconBadge from '@/components/ui/IconBadge'
+import TiltCard from '@/components/ui/TiltCard'
+import { GlowOrb } from '@/components/ui/Aurora'
+import { colors, glow, gradientCss, gradients } from '@/components/ui/theme'
+
+function MenuRow({ href, icon, title, subtitle }: { href: string; icon: ReactNode; title: string; subtitle: string }) {
+  return (
+    <Link href={href} className="flex items-center gap-3 py-3 min-h-[44px] hover:opacity-80">
+      {icon}
+      <span className="flex-1 min-w-0">
+        <span className="block text-white text-sm font-semibold">{title}</span>
+        <span className="block text-[#6b7876] text-xs">{subtitle}</span>
+      </span>
+      <ChevronRight color={colors.muted} size={16} className="flex-shrink-0" />
+    </Link>
+  )
+}
 
 export default function PerfilPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
+  const [savedWeight, setSavedWeight] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -36,6 +56,7 @@ export default function PerfilPage() {
         setUsername(profile.username || '')
         setAge(profile.age ? String(profile.age) : '')
         setWeightKg(profile.weight_kg ? String(profile.weight_kg) : '')
+        setSavedWeight(profile.weight_kg ? String(profile.weight_kg) : '')
         setHeightCm(profile.height_cm ? String(profile.height_cm) : '')
         setGender(profile.gender || '')
         setGoal(profile.goal || '')
@@ -77,6 +98,27 @@ export default function PerfilPage() {
       return
     }
 
+    // Si el peso cambió, también se registra en body_metrics para que Progreso lo vea
+    const newWeight = weightKg ? parseFloat(weightKg) : null
+    if (newWeight && weightKg !== savedWeight) {
+      const today = new Date().toISOString().split('T')[0]
+      const { data: existing } = await supabase
+        .from('body_metrics')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .maybeSingle()
+      const { error: metricError } = existing
+        ? await supabase.from('body_metrics').update({ weight_kg: newWeight }).eq('id', existing.id)
+        : await supabase.from('body_metrics').insert({ user_id: user.id, date: today, weight_kg: newWeight })
+      if (metricError) {
+        setError('Tu perfil se guardó, pero el peso no llegó a Progreso. Intenta de nuevo.')
+        setSaving(false)
+        return
+      }
+      setSavedWeight(weightKg)
+    }
+
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
@@ -87,10 +129,28 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-white mb-6">Editar perfil</h1>
+    <div className="relative max-w-xl mx-auto px-4 py-8 overflow-hidden">
+      <GlowOrb color={colors.primary} size={340} style={{ top: -170, right: -130 }} intensity={0.22} />
 
-      <div className="card-dark p-5 space-y-4">
+      {/* Avatar 3D */}
+      <div className="relative flex flex-col items-center mb-6">
+        <TiltCard float radius={36} maxTilt={14} style={glow(colors.primary, 22, 0.5)}>
+          <div className="w-[88px] h-[88px] flex items-center justify-center" style={{ borderRadius: 36, background: gradientCss(gradients.brand) }}>
+            <span className="text-4xl font-black" style={{ color: '#04120a' }}>{username?.[0]?.toUpperCase() || 'U'}</span>
+          </div>
+        </TiltCard>
+        <h1 className="text-white text-2xl font-extrabold mt-4">{username || 'Tu perfil'}</h1>
+      </div>
+
+      {/* Menú */}
+      <div className="relative card-dark rounded-3xl px-4 py-1 mb-4 divide-y divide-[#2a3532]">
+        <MenuRow href="/logros" title="Logros e insignias" subtitle="Lo que has desbloqueado" icon={<IconBadge colors={gradients.gold} size={34} radius={11}><Trophy color="#422006" size={16} /></IconBadge>} />
+        <MenuRow href="/cuerpo" title="Tu mapa muscular" subtitle="Rango, recuperación y comparación" icon={<IconBadge colors={gradients.violet} size={34} radius={11}><PersonStanding color="#ffffff" size={16} /></IconBadge>} />
+        <MenuRow href="/perfil/privacidad" title="Privacidad y cuenta" subtitle="Tu autorización, cerrar sesión y borrar cuenta" icon={<IconBadge colors={gradients.ocean} size={34} radius={11}><ShieldCheck color="#04120a" size={16} /></IconBadge>} />
+      </div>
+
+      <div className="relative card-dark rounded-3xl p-5 space-y-4">
+        <p className="text-white font-bold">Editar perfil</p>
         <div>
           <label className="block text-sm font-medium text-[#9ca8a5] mb-1">Nombre de usuario</label>
           <input

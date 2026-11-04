@@ -1,14 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/core/supabase/client'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import {
   Weight, Percent, Dumbbell, TrendingUp, TrendingDown, ArrowUp,
-  Flame, Clock, Activity, Plus, Target, Loader2,
+  Flame, Clock, Activity, Plus, Target, Loader2, PersonStanding, ChevronRight,
 } from 'lucide-react'
+import CardioSection from '@/components/run/CardioSection'
+import StrengthSection from '@/components/progress/StrengthSection'
+import IconBadge from '@/components/ui/IconBadge'
+import { GlowOrb } from '@/components/ui/Aurora'
+import { colors, gradientCss, gradients } from '@/components/ui/theme'
 
-const TABS = ['Progreso', 'Métricas', 'Metas']
+const TABS = ['Progreso', 'Métricas', 'Cardio', 'Metas']
 const GOAL_OPTIONS = [
   { value: 'perder_grasa', label: '🔥 Perder grasa' },
   { value: 'ganar_musculo', label: '💪 Ganar músculo' },
@@ -16,9 +23,11 @@ const GOAL_OPTIONS = [
   { value: 'resistencia', label: '🏃 Mejorar resistencia' },
 ]
 
-export default function ProgresoPage() {
+function Progreso() {
   const supabase = createClient()
-  const [activeTab, setActiveTab] = useState('Progreso')
+  // Abrir una pestaña concreta desde otra pantalla (p. ej. la tarjeta de pasos del Inicio)
+  const tabParam = useSearchParams().get('tab')
+  const [activeTab, setActiveTab] = useState(tabParam && TABS.includes(tabParam) ? tabParam : 'Progreso')
   const [loading, setLoading] = useState(true)
 
   const [profileWeight, setProfileWeight] = useState<number | null>(null)
@@ -146,10 +155,12 @@ export default function ProgresoPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div className="relative max-w-5xl mx-auto px-4 py-8 overflow-hidden">
+      <GlowOrb color={colors.primary} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
+      <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Tu Progreso</h1>
+          <p className="text-green-500 text-xs font-bold uppercase" style={{ letterSpacing: 2 }}>Tu evolución</p>
+          <h1 className="text-3xl font-extrabold text-white mt-1">Tu Progreso</h1>
           <p className="text-sm text-[#9ca8a5] mt-0.5">Los resultados se construyen con información.</p>
         </div>
         {activeTab === 'Progreso' && (
@@ -163,7 +174,23 @@ export default function ProgresoPage() {
         )}
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <Link
+        href="/cuerpo"
+        aria-label="Abrir mi mapa muscular"
+        className="press relative rounded-3xl p-4 mb-5 flex items-center gap-3"
+        style={{ background: gradientCss(['#1e1b4b', '#141b19'], 'horizontal'), border: '1px solid rgba(167,139,250,0.35)' }}
+      >
+        <IconBadge colors={gradients.violet} size={42} radius={14}>
+          <PersonStanding color="#ffffff" size={20} />
+        </IconBadge>
+        <span className="flex-1 min-w-0">
+          <span className="block text-white font-bold text-sm">Tu mapa muscular 3D</span>
+          <span className="block text-[#9ca8a5] text-xs mt-0.5">Rango por músculo, recuperación y comparación con amigos</span>
+        </span>
+        <ChevronRight color={colors.violet} size={18} className="flex-shrink-0" />
+      </Link>
+
+      <div className="relative flex flex-wrap gap-2 mb-6">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -335,11 +362,9 @@ export default function ProgresoPage() {
         </>
       )}
 
-      {activeTab === 'Métricas' && (
-        <div className="text-center py-16 card-dark">
-          <p className="text-[#9ca8a5]">Próximamente: % grasa corporal, masa muscular y más métricas detalladas 🚧</p>
-        </div>
-      )}
+      {activeTab === 'Métricas' && <StrengthSection />}
+
+      {activeTab === 'Cardio' && <CardioSection />}
 
       {activeTab === 'Metas' && (
         <div className="card-dark p-5 max-w-xl">
@@ -384,5 +409,13 @@ export default function ProgresoPage() {
         </div>
       )}
     </div>
+  )
+}
+// useSearchParams exige un límite Suspense en Next.js
+export default function ProgresoPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[#6b7876]">Cargando progreso...</div>}>
+      <Progreso />
+    </Suspense>
   )
 }

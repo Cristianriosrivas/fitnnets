@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/core/supabase/client'
-import { Search, UserPlus, Check, X, Users, Trophy, ArrowRight, PlusCircle } from 'lucide-react'
+import { Search, UserPlus, Check, X, Users, Trophy, ArrowRight, PlusCircle, Swords } from 'lucide-react'
 import Link from 'next/link'
+import { GlowOrb } from '@/components/ui/Aurora'
+import { colors } from '@/components/ui/theme'
 
 export default function SocialPage() {
   const supabase = createClient()
@@ -92,10 +94,12 @@ export default function SocialPage() {
   const initials = (name: string) => name?.[0]?.toUpperCase() || '?'
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="relative max-w-5xl mx-auto px-4 py-8 overflow-hidden">
+      <GlowOrb color={colors.sky} size={340} style={{ top: -170, right: -130 }} intensity={0.2} />
+      <div className="relative flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Social</h1>
+          <p className="text-green-500 text-xs font-bold uppercase" style={{ letterSpacing: 2 }}>Comunidad</p>
+          <h1 className="text-3xl font-extrabold text-white mt-1">Social</h1>
           <p className="text-sm text-[#9ca8a5] mt-0.5">Entrena en comunidad y compite con tus amigos.</p>
         </div>
         <Link href="/social/retos" className="btn-primary flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl">
@@ -104,7 +108,7 @@ export default function SocialPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+      <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
         {/* Columna principal */}
         <div>
           {/* Buscador */}
@@ -212,11 +216,20 @@ export default function SocialPage() {
                         </div>
                         <span className="text-sm text-white truncate flex-1 min-w-0">{f.profile?.username}</span>
                         <Link
+                          href={`/cuerpo?friendId=${f.profile?.id}&friendName=${encodeURIComponent(f.profile?.username || '')}`}
+                          aria-label={'Compararme con ' + f.profile?.username}
+                          className="btn-secondary flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg flex-shrink-0 mr-1.5"
+                        >
+                          <Swords size={14} />
+                          Comparar
+                        </Link>
+                        <Link
                           href={`/rutinas/nueva?friendId=${f.profile?.id}&friendName=${encodeURIComponent(f.profile?.username || '')}`}
+                          aria-label={'Crear rutina para ' + f.profile?.username}
                           className="btn-secondary flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg flex-shrink-0"
                         >
                           <PlusCircle size={14} />
-                          Crear rutina
+                          Rutina
                         </Link>
                       </div>
                     ))}
