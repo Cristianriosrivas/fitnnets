@@ -1,7 +1,17 @@
 import { createClient } from '@/core/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { getGeminiModel } from '@/core/ai/gemini'
+import { aiErrorResponse, generateWithFallback, parseJson } from '@/core/ai/gemini'
 import { NextResponse } from 'next/server'
+
+// Si un modelo está saturado se prueba otro: la petición puede tardar más que una sola llamada
+export const maxDuration = 120
+
+type AiPlan = {
+  protein_g: number
+  carbs_g: number
+  fats_g: number
+  meals: { meal_type: string; description: string; calories: number }[]
+}
 
 function calcularCalorias(profile: any) {
   const { weight_kg, height_cm, age, gender, activity_level, goal } = profile
@@ -109,11 +119,15 @@ Las calorías de todas las comidas deben sumar aproximadamente ${dailyCalories} 
 `.trim()
 
   try {
-    const model = getGeminiModel()
-    const result = await model.generateContent(prompt)
-    const rawText = result.response.text()
-    const cleanJson = rawText.replace(/```json|```/g, '').trim()
-    const aiPlan = JSON.parse(cleanJson)
+    const { data: aiPlan } = await generateWithFallback(
+      prompt,
+      (text) => {
+        const parsed = parseJson<AiPlan>(text)
+        if (!parsed.meals?.length) throw new Error('Plan sin comidas')
+        return parsed
+      },
+      { json: true }
+    )
 
     const { data: existing } = await supabase
       .from('meal_plans')
@@ -157,9 +171,6 @@ Las calorías de todas las comidas deben sumar aproximadamente ${dailyCalories} 
     return NextResponse.json({ success: true, mealPlanId: mealPlan.id })
   } catch (err: any) {
     console.error('Error generando plan de comidas:', err)
-    return NextResponse.json(
-      { error: 'No se pudo generar el plan. Intenta de nuevo.' },
-      { status: 500 }
-    )
+    return aiErrorResponse(err, 'No se pudo generar el plan. Intenta de nuevo.')
   }
 }

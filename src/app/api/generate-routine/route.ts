@@ -1,7 +1,19 @@
 import { createClient } from '@/core/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { getGeminiModel } from '@/core/ai/gemini'
+import { aiErrorResponse, generateWithFallback, parseJson } from '@/core/ai/gemini'
 import { NextResponse } from 'next/server'
+
+// Si un modelo está saturado se prueba otro: la petición puede tardar más que una sola llamada
+export const maxDuration = 120
+
+type AiRoutine = {
+  title: string
+  days: {
+    day_number: number
+    title: string
+    exercises: { exercise_id: string; sets: number; reps: string; rest_seconds: number }[]
+  }[]
+}
 
 export async function POST(request: Request) {
   let supabase = await createClient()
@@ -96,14 +108,23 @@ Incluye entre 5 y 7 ejercicios por día. Ajusta series, repeticiones y descanso
 según el objetivo de la persona.
 `.trim()
 
-  try {
-    const model = getGeminiModel()
-    const result = await model.generateContent(prompt)
-    const rawText = result.response.text()
+  const validIds = new Set(exercises.map((e) => e.id))
+  let routineId: string | null = null
 
-    // Limpiar posibles backticks de markdown que a veces agrega la IA
-    const cleanJson = rawText.replace(/```json|```/g, '').trim()
-    const aiRoutine = JSON.parse(cleanJson)
+  try {
+    // Se aceptan solo ejercicios del catálogo: un id inventado rompería la llave foránea al guardar
+    const { data: aiRoutine } = await generateWithFallback(
+      prompt,
+      (text) => {
+        const parsed = parseJson<AiRoutine>(text)
+        const days = (parsed.days || [])
+          .map((day) => ({ ...day, exercises: (day.exercises || []).filter((ex) => validIds.has(ex.exercise_id)) }))
+          .filter((day) => day.exercises.length > 0)
+        if (!parsed.title || days.length === 0) throw new Error('Rutina sin días válidos')
+        return { ...parsed, days }
+      },
+      { json: true }
+    )
 
     // 4. Guardar la rutina en la base de datos
     const { data: routine, error: routineError } = await supabase
@@ -119,6 +140,7 @@ según el objetivo de la persona.
       .single()
 
     if (routineError) throw routineError
+    routineId = routine.id
 
     // 5. Guardar cada día y sus ejercicios
     for (const day of aiRoutine.days) {
@@ -153,9 +175,8 @@ según el objetivo de la persona.
     return NextResponse.json({ success: true, routineId: routine.id })
   } catch (err: any) {
     console.error('Error generando rutina:', err)
-    return NextResponse.json(
-      { error: 'No se pudo generar la rutina. Intenta de nuevo.' },
-      { status: 500 }
-    )
+    // Una rutina a medio guardar no sirve: el borrado arrastra sus días por cascada
+    if (routineId) await supabase.from('routines').delete().eq('id', routineId)
+    return aiErrorResponse(err, 'No se pudo generar la rutina. Intenta de nuevo.')
   }
 }
