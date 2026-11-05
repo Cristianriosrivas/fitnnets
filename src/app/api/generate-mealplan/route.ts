@@ -119,7 +119,7 @@ Las calorías de todas las comidas deben sumar aproximadamente ${dailyCalories} 
 `.trim()
 
   try {
-    const { data: aiPlan } = await generateWithFallback(
+    const { data: aiPlan, model, attempts } = await generateWithFallback(
       prompt,
       (text) => {
         const parsed = parseJson<AiPlan>(text)
@@ -168,7 +168,7 @@ Las calorías de todas las comidas deben sumar aproximadamente ${dailyCalories} 
     const { error: mealsError } = await supabase.from('meals').insert(mealsToInsert)
     if (mealsError) throw mealsError
 
-    return NextResponse.json({ success: true, mealPlanId: mealPlan.id })
+    return NextResponse.json({ success: true, mealPlanId: mealPlan.id, model, attempts })
   } catch (err: any) {
     console.error('Error generando plan de comidas:', err)
     return aiErrorResponse(err, 'No se pudo generar el plan. Intenta de nuevo.')

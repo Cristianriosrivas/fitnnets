@@ -19,13 +19,13 @@ Ejemplo de respuesta válida: 450
 
   try {
     // Extraer solo el número, por si la IA agrega algo de texto
-    const { data: calories } = await generateWithFallback(prompt, (text) => {
+    const { data: calories, model, attempts } = await generateWithFallback(prompt, (text) => {
       const match = text.match(/\d+/)
       if (!match) throw new Error('Respuesta sin número')
       return parseInt(match[0])
     })
 
-    return NextResponse.json({ calories })
+    return NextResponse.json({ calories, model, attempts })
   } catch (err) {
     console.error('Error estimando calorías:', err)
     return aiErrorResponse(err, 'No se pudo estimar')

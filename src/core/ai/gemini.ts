@@ -22,8 +22,13 @@ type FailureKind = 'overloaded' | 'quota' | 'not_found' | 'bad_key' | 'bad_outpu
 type Attempt = { model: string; status: number | null; kind: FailureKind }
 
 export class AiError extends Error {
-  constructor(public code: AiErrorCode, public attempts: Attempt[]) {
+  code: AiErrorCode
+  attempts: Attempt[]
+
+  constructor(code: AiErrorCode, attempts: Attempt[]) {
     super(code)
+    this.code = code
+    this.attempts = attempts
   }
 }
 
@@ -86,7 +91,7 @@ function classify(err: unknown): { status: number | null; kind: FailureKind } {
 
 // Prueba los modelos hasta tener una respuesta que parse acepte. Si parse lanza un error, la
 // respuesta no sirve y se pasa al siguiente modelo.
-export async function generateWithFallback<T>(prompt: string, parse: (text: string) => T, options: { json?: boolean } = {}): Promise<{ data: T; model: string }> {
+export async function generateWithFallback<T>(prompt: string, parse: (text: string) => T, options: { json?: boolean } = {}): Promise<{ data: T; model: string; attempts: Attempt[] }> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new AiError('no_key', [])
 
@@ -118,7 +123,7 @@ export async function generateWithFallback<T>(prompt: string, parse: (text: stri
         // Funcionó, pero si tardó mucho se le da paso a otro en la siguiente petición
         if (Date.now() - attemptStart > SLOW_RESPONSE_MS) cooldowns.set(name, Date.now() + COOLDOWN_MS.slow)
         else cooldowns.delete(name)
-        return { data, model: name }
+        return { data, model: name, attempts }
       } catch (err) {
         const { status, kind } = classify(err)
         attempts.push({ model: name, status, kind })

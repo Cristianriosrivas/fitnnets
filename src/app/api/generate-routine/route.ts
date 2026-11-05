@@ -113,7 +113,7 @@ según el objetivo de la persona.
 
   try {
     // Se aceptan solo ejercicios del catálogo: un id inventado rompería la llave foránea al guardar
-    const { data: aiRoutine } = await generateWithFallback(
+    const { data: aiRoutine, model, attempts } = await generateWithFallback(
       prompt,
       (text) => {
         const parsed = parseJson<AiRoutine>(text)
@@ -172,7 +172,7 @@ según el objetivo de la persona.
       if (exError) throw exError
     }
 
-    return NextResponse.json({ success: true, routineId: routine.id })
+    return NextResponse.json({ success: true, routineId: routine.id, model, attempts })
   } catch (err: any) {
     console.error('Error generando rutina:', err)
     // Una rutina a medio guardar no sirve: el borrado arrastra sus días por cascada

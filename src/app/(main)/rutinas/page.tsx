@@ -5,12 +5,14 @@ import { createClient } from '@/core/supabase/client'
 import { Sparkles, Loader2, PlusCircle, Clock, Repeat, Dumbbell, ChevronDown, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { GlowOrb } from '@/components/ui/Aurora'
+import GenerationProgress, { useGeneration } from '@/components/ui/GenerationProgress'
+import { postAi } from '@/core/aiRequest'
 import { colors } from '@/components/ui/theme'
 
 export default function RutinasPage() {
   const supabase = createClient()
   const [routines, setRoutines] = useState<any[]>([])
-  const [generating, setGenerating] = useState(false)
+  const generation = useGeneration('routine')
   const [error, setError] = useState('')
   const [loadingList, setLoadingList] = useState(true)
   const [filter, setFilter] = useState<string>('todas')
@@ -31,19 +33,17 @@ export default function RutinasPage() {
     loadRoutines()
   }, [])
 
-  const handleGenerate = async () => {
-    setGenerating(true)
-    setError('')
-    const res = await fetch('/api/generate-routine', { method: 'POST' })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || 'Error al generar la rutina')
-      setGenerating(false)
-      return
-    }
-    await loadRoutines()
-    setGenerating(false)
-  }
+  const handleGenerate = () =>
+    generation.run(async () => {
+      setError('')
+      const result = await postAi('/api/generate-routine')
+      if (!result.ok) {
+        setError(result.message)
+        return false
+      }
+      await loadRoutines()
+      return true
+    })
 
   const handleDelete = async (routineId: string) => {
     if (!confirm('Seguro que quieres borrar esta rutina? Esta accion no se puede deshacer.')) return
@@ -88,11 +88,11 @@ export default function RutinasPage() {
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={handleGenerate}
-            disabled={generating}
+            disabled={generation.active}
             className="btn-primary flex items-center justify-center gap-2 text-sm px-4 py-2.5 rounded-xl disabled:opacity-50"
           >
-            {generating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            {generating ? 'Generando...' : 'Generar con IA'}
+            {generation.active ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+            {generation.active ? 'Generando...' : 'Generar con IA'}
           </button>
           <Link
             href="/rutinas/nueva"
@@ -103,6 +103,8 @@ export default function RutinasPage() {
           </Link>
         </div>
       </div>
+
+      <GenerationProgress generation={generation} />
 
       {/* Filtros por pestañas */}
       <div className="relative flex gap-2 overflow-x-auto pb-1 mb-6">

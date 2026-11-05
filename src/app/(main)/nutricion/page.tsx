@@ -1,6 +1,8 @@
 'use client'
 
 import { GlowOrb } from '@/components/ui/Aurora'
+import GenerationProgress, { useGeneration } from '@/components/ui/GenerationProgress'
+import { postAi } from '@/core/aiRequest'
 import { colors } from '@/components/ui/theme'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/core/supabase/client'
@@ -43,7 +45,7 @@ const today = new Date().toISOString().split('T')[0]
 export default function NutricionPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
+  const generation = useGeneration('mealplan')
   const [error, setError] = useState('')
   const [plan, setPlan] = useState<any>(null)
   const [ingredients, setIngredients] = useState('')
@@ -84,24 +86,18 @@ export default function NutricionPage() {
     loadPlan()
   }, [])
 
-  const handleGenerate = async () => {
-    setGenerating(true)
-    setError('')
-    const res = await fetch('/api/generate-mealplan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ingredients }),
+  const handleGenerate = () =>
+    generation.run(async () => {
+      setError('')
+      const result = await postAi('/api/generate-mealplan', { body: JSON.stringify({ ingredients }) })
+      if (!result.ok) {
+        setError(result.message)
+        return false
+      }
+      await loadPlan()
+      setShowIngredientsBox(false)
+      return true
     })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || 'Error al generar el plan')
-      setGenerating(false)
-      return
-    }
-    await loadPlan()
-    setGenerating(false)
-    setShowIngredientsBox(false)
-  }
 
   const startEditMeal = (meal: any) => {
     setEditingMealId(meal.id)
@@ -249,7 +245,7 @@ export default function NutricionPage() {
           <div className="flex flex-col sm:flex-row gap-3 mb-5">
             <button
               onClick={() => setShowIngredientsBox((v) => !v)}
-              disabled={generating}
+              disabled={generation.active}
               className="btn-primary flex items-center justify-center gap-2 text-sm px-4 py-2.5 rounded-xl flex-1 disabled:opacity-50"
             >
               <Sparkles size={16} />
@@ -264,6 +260,8 @@ export default function NutricionPage() {
             </button>
           </div>
 
+          <GenerationProgress generation={generation} />
+
           {showIngredientsBox && (
             <div className="card-dark p-4 mb-5">
               <label className="block text-sm font-medium text-white mb-1">¿Qué alimentos tienes disponibles hoy?</label>
@@ -277,10 +275,10 @@ export default function NutricionPage() {
               />
               <button
                 onClick={handleGenerate}
-                disabled={generating}
+                disabled={generation.active}
                 className="btn-primary mt-3 w-full py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {generating ? <><Loader2 size={16} className="animate-spin" /> Generando...</> : 'Generar mi plan de hoy'}
+                {generation.active ? <><Loader2 size={16} className="animate-spin" /> Generando...</> : 'Generar mi plan de hoy'}
               </button>
             </div>
           )}
